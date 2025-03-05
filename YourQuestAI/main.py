@@ -7,7 +7,7 @@ import os
 import requests  # to get image from the web
 import shutil  # to save it locally
 
-openai.api_key = "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"
+openai.api_key = ""
 
 # Create the application.
 APP = flask.Flask(__name__)
@@ -20,7 +20,7 @@ currentStep = 0
 bad_choice = ''
 game_on = True
 allImgDir = "YourQuestAIImages"
-projectDir = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Documents\GitHub\AdventureGameAI\YourQuestAI\static')
+projectDir = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Documents/GitHub/AdventureGameAI/YourQuestAI/static')
 imageDir = os.path.join(projectDir, allImgDir)
 folderNo = ''
 name = 'Your name...'
@@ -68,7 +68,10 @@ class talkingRobot:
 
     def plot_of_game(self, ):
         if not game_on:
-            self.prompt = f"{self.robot_act}We are in the world of {self.book}.Based on {self.currentSummary}  and the fact that this choice was picked {self.currentChoice} create an ending for the story, where {self.name} is defeated tragically, 2 or 3 sentences long."
+            self.prompt =[
+        {"role": "system", "content": f"{self.robot_act}"},
+        {"role": "user", "content": f"We are in the world of {self.book}.Based on {self.currentSummary}  and the fact that this choice was picked {self.currentChoice} create an ending for the story, where {self.name} is defeated tragically, 2 or 3 sentences long."}
+    ]
         elif currentStep == 0:
             self.prompt = f"{self.robot_act}We are in the world of {self.book}.Based on the book or game: {self.book} and create an intro, 5 sentences long, in which you introduce me, {self.name}, the main character , in the game. You narrate this intro about me."
         elif currentStep == 8:
@@ -79,10 +82,10 @@ class talkingRobot:
             self.prompt = f"{self.robot_act}We are in the world of {self.book}.Based on {self.currentSummary}  and the fact that this choice was picked {self.currentChoice} create an ending for the story, where {self.name} emerges victorious, 2 or 3 sentences long."
         else:
             self.prompt = f"{self.robot_act} We are in the world of {self.book}. Based on {self.currentSummary} and the fact that this choice was picked {self.currentChoice}, create the story, 2 or 3 sentences long"
-        self.plot = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=self.prompt,
-            max_tokens=1000,
+        self.plot = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=self.prompt,
+            max_tokens=100,
             n=1,
             stop=None,
             temperature=0.9,
@@ -90,9 +93,9 @@ class talkingRobot:
         return self.plot
 
     def summary_of_plot(self):
-        self.summary = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=f"{self.robot_act} Create a summary for this plot: {self.plot}, max 2 or 3 sentences",
+        self.summary = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=f"{self.robot_act} Create a summary for this plot: {self.plot}, max 2 or 3 sentences",
             max_tokens=350,
             n=1,
             stop=None,
@@ -103,9 +106,9 @@ class talkingRobot:
         return self.summary
 
     def choices_robot(self):
-        self.choices = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=f"{self.robot_act} Reading this plot {self.plot} generate 3 choices, noted 1 through 3, each choice should be maximum 90 characters, from which I should choose to continue the game. It is a must that you make one of the choices bad. Also, at the end of the bad one, write the character ~, but for the other choices, dont write anything after them.",
+        self.choices = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=f"{self.robot_act} Reading this plot {self.plot} generate 3 choices, noted 1 through 3, each choice should be maximum 90 characters, from which I should choose to continue the game. It is a must that you make one of the choices bad. Also, at the end of the bad one, write the character ~, but for the other choices, dont write anything after them.",
             max_tokens=300,
             n=1,
             stop=None,
@@ -123,9 +126,9 @@ class talkingRobot:
         random.shuffle(self.final_choice)
         return self.final_choice
     def createVisualDesc(self):
-        self.visual = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=f"Reading this plot: {self.summary} generate a visual description, 2 sentences long. Keep in mind that i will use this to generate an image with DALL-E",
+        self.visual = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=f"Reading this plot: {self.summary} generate a visual description, 2 sentences long. Keep in mind that i will use this to generate an image with DALL-E",
             max_tokens=300,
             n=1,
             stop=None,
@@ -263,8 +266,7 @@ def add():
                 game_on = True
                 print (f"GAME STATUS SET TO {game_on}")
                 allImgDir = "YourQuestAIImages"
-                projectDir = os.path.join(os.path.join(os.environ['USERPROFILE']),
-                                          'Documents\GitHub\AdventureGameAI\YourQuestAI\static')
+                projectDir = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Documents/GitHub/AdventureGameAI/YourQuestAI/static')
                 imageDir = os.path.join(projectDir, allImgDir)
                 folderNo = ''
                 game = 'Book/Videogame...'
@@ -289,8 +291,7 @@ def add():
             game_on = True
             print(f"GAME STATUS SET TO {game_on}")
             allImgDir = "YourQuestAIImages"
-            projectDir = os.path.join(os.path.join(os.environ['USERPROFILE']),
-                                      'Documents\GitHub\AdventureGameAI\YourQuestAI\static')
+            projectDir = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Documents/GitHub/AdventureGameAI/YourQuestAI/static')
             imageDir = os.path.join(projectDir, allImgDir)
             folderNo = ''
             game = 'Book/Videogame...'
